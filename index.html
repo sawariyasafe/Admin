@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Panel — Shree Saawariya Safe Company</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI",Arial,sans-serif;background:#f4f6f9;color:#1f2937;line-height:1.5;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  input,textarea,select{font-family:inherit;font-size:14px}
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+
+  :root{
+    --primary:#1e3a5f;--primary-dark:#152a45;--accent:#f58220;--accent-dark:#d96f15;
+    --border:#e3e6ea;--muted:#5b6572;--danger:#dc2626;--success:#16a34a;
+    --radius:6px;--shadow:0 2px 8px rgba(0,0,0,.08);
+  }
+
+  /* LOGIN */
+  .login-wrap{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+    background:linear-gradient(135deg,#1e3a5f 0%,#152a45 100%);
+  }
+  .login-box{
+    background:#fff;padding:40px 32px;border-radius:12px;width:100%;max-width:400px;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+  }
+  .login-box .brand{text-align:center;margin-bottom:24px}
+  .login-box .brand .icon{font-size:44px;line-height:1;margin-bottom:8px}
+  .login-box h1{font-size:20px;color:var(--primary);margin-bottom:4px}
+  .login-box p{color:var(--muted);font-size:13px}
+  .login-box label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#3a4452}
+  .login-box input{
+    width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:var(--radius);
+    margin-bottom:14px;outline:none;transition:border-color .15s;
+  }
+  .login-box input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(30,58,95,.1)}
+  .login-box button{
+    width:100%;padding:12px;background:var(--primary);color:#fff;border-radius:var(--radius);
+    font-weight:600;font-size:14px;transition:background .15s;
+  }
+  .login-box button:hover{background:var(--primary-dark)}
+  .login-box button:disabled{opacity:.6;cursor:not-allowed}
+  .login-error{color:var(--danger);font-size:13px;margin-top:10px;text-align:center;min-height:18px}
+
+  /* APP */
+  .app{display:none}
+  .app.active{display:block}
+
+  .topbar{
+    background:var(--primary);color:#fff;padding:12px 24px;
+    display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.15);
+    flex-wrap:wrap;gap:10px;
+  }
+  .topbar h1{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .topbar h1 span{color:var(--accent)}
+  .topbar .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .topbar .user-email{font-size:12px;opacity:.85}
+  .topbar button,.topbar a{
+    padding:8px 14px;border-radius:var(--radius);font-size:13px;font-weight:600;
+    background:rgba(255,255,255,.15);color:#fff;transition:background .15s;
+  }
+  .topbar button:hover,.topbar a:hover{background:rgba(255,255,255,.25)}
+
+  .layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px)}
+  .sidebar{background:#fff;border-right:1px solid var(--border);padding:16px 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+  .sidebar button{
+    display:block;width:100%;text-align:left;padding:12px 22px;font-size:14px;font-weight:600;
+    color:#3a4452;border-left:3px solid transparent;transition:all .15s;
+  }
+  .sidebar button:hover{background:#f8f9fb;color:var(--primary)}
+  .sidebar button.active{background:#f0f4f9;color:var(--primary);border-left-color:var(--accent)}
+
+  .main{padding:24px 28px;overflow-x:hidden}
+  .page{display:none}
+  .page.active{display:block}
+
+  .page-head{
+    display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;
+    flex-wrap:wrap;gap:12px;
+  }
+  .page-head h2{font-size:20px;color:var(--primary);display:flex;align-items:center;gap:6px}
+  .page-head .count{color:var(--muted);font-size:13px;font-weight:400}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    padding:9px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;
+    background:var(--primary);color:#fff;transition:all .15s;white-space:nowrap;
+  }
+  .btn:hover{background:var(--primary-dark)}
+  .btn-accent{background:var(--accent)}
+  .btn-accent:hover{background:var(--accent-dark)}
+  .btn-danger{background:var(--danger)}
+  .btn-danger:hover{background:#b91c1c}
+  .btn-outline{background:#fff;color:var(--primary);border:1px solid var(--primary)}
+  .btn-outline:hover{background:var(--primary);color:#fff}
+  .btn-sm{padding:6px 12px;font-size:12px}
+
+  /* TABLE */
+  .table-wrap{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:600px}
+  th,td{padding:12px 14px;text-align:left;font-size:13.5px;border-bottom:1px solid var(--border);vertical-align:middle}
+  th{background:#f8f9fb;color:var(--primary);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#fafbfc}
+  td img.thumb{width:60px;height:60px;object-fit:cover;border-radius:4px;border:1px solid var(--border)}
+  td video.thumb-vid{width:110px;height:64px;object-fit:cover;border-radius:4px;border:1px solid var(--border);background:#000}
+  td .row-actions{display:flex;gap:6px;flex-wrap:wrap}
+  .empty{padding:50px 20px;text-align:center;color:var(--muted);font-size:14px}
+
+  .badge{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.3px}
+  .badge-on{background:#dcfce7;color:#166534}
+  .badge-off{background:#fee2e2;color:#991b1b}
+  .stars-mini{color:#f58220;letter-spacing:1px}
+
+  .form-card{background:#fff;border-radius:var(--radius);padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+
+  /* MODAL */
+  .overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;
+    display:none;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;
+  }
+  .overlay.active{display:flex}
+  .modal{
+    background:#fff;border-radius:12px;width:100%;max-width:680px;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);margin:auto;display:flex;flex-direction:column;max-height:calc(100vh - 48px);
+  }
+  .modal.wide{max-width:820px}
+  .modal-head{
+    padding:18px 24px;border-bottom:1px solid var(--border);
+    display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
+  }
+  .modal-head h3{font-size:17px;color:var(--primary)}
+  .modal-head .close{font-size:26px;color:var(--muted);line-height:1;padding:0 4px}
+  .modal-head .close:hover{color:var(--danger)}
+  .modal-body{padding:24px;overflow-y:auto;flex:1}
+  .modal-foot{
+    padding:16px 24px;border-top:1px solid var(--border);
+    display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;flex-shrink:0;
+  }
+
+  .field{margin-bottom:16px}
+  .field label.lbl{display:block;font-size:13px;font-weight:600;color:#3a4452;margin-bottom:6px}
+  .field input[type=text],.field input[type=number],.field input[type=email],.field textarea,.field select{
+    width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius);
+    outline:none;font-size:14px;background:#fff;transition:border-color .15s;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{
+    border-color:var(--primary);box-shadow:0 0 0 3px rgba(30,58,95,.1)
+  }
+  .field textarea{min-height:80px;resize:vertical}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px}
+  .check-line{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#3a4452;cursor:pointer}
+  .check-line input{width:auto}
+
+  /* FILE UPLOAD */
+  .upload-box{
+    border:2px dashed var(--border);border-radius:var(--radius);
+    padding:20px;text-align:center;cursor:pointer;transition:all .15s;background:#fafbfc;display:block;
+  }
+  .upload-box:hover{border-color:var(--accent);background:#fff8f0}
+  .upload-box input[type=file]{display:none}
+  .upload-box .icon{font-size:32px;line-height:1;margin-bottom:8px}
+  .upload-box .label{font-size:13px;font-weight:600;color:var(--primary);display:block}
+  .upload-box .sub{font-size:11px;color:var(--muted);margin-top:4px;display:block}
+  .upload-box.uploading{opacity:.6;pointer-events:none}
+
+  .preview{margin-top:12px;position:relative;display:inline-block}
+  .preview img{max-width:180px;max-height:180px;border-radius:4px;border:1px solid var(--border);display:block;object-fit:cover}
+  .preview video{max-width:320px;max-height:200px;border-radius:4px;border:1px solid var(--border);display:block;background:#000}
+  .preview .remove{
+    position:absolute;top:-8px;right:-8px;background:var(--danger);color:#fff;
+    width:26px;height:26px;border-radius:50%;font-size:16px;line-height:1;display:flex;
+    align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2);z-index:2;
+  }
+
+  .multi-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .multi-preview .item{position:relative}
+  .multi-preview .item img{width:80px;height:80px;object-fit:cover;border-radius:4px;border:1px solid var(--border)}
+  .multi-preview .item .remove{
+    position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;
+    width:22px;height:22px;border-radius:50%;font-size:13px;line-height:1;display:flex;
+    align-items:center;justify-content:center;
+  }
+
+  /* RATING STARS INPUT */
+  .star-input{display:flex;gap:6px;font-size:28px;line-height:1;cursor:pointer;user-select:none}
+  .star-input span{color:#d1d5db;transition:color .15s}
+  .star-input span.active{color:#f58220}
+  .star-input span:hover{color:#f58220}
+
+  /* TOAST */
+  .toast{
+    position:fixed;top:20px;right:20px;background:var(--primary);color:#fff;
+    padding:14px 20px;border-radius:var(--radius);font-size:14px;font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:1000;
+    transform:translateX(120%);transition:transform .3s ease;max-width:340px;
+  }
+  .toast.show{transform:translateX(0)}
+  .toast.success{background:var(--success)}
+  .toast.error{background:var(--danger)}
+
+  .spinner{
+    width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+    border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block;vertical-align:middle;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  @media (max-width:768px){
+    .layout{grid-template-columns:1fr}
+    .sidebar{
+      position:static;height:auto;display:flex;overflow-x:auto;padding:0;
+      border-right:none;border-bottom:1px solid var(--border);
+    }
+    .sidebar button{white-space:nowrap;border-left:none;border-bottom:3px solid transparent;padding:12px 16px}
+    .sidebar button.active{border-left:none;border-bottom-color:var(--accent)}
+    .main{padding:16px}
+    .field-row,.field-row-3{grid-template-columns:1fr}
+    .page-head h2{font-size:17px}
+    th,td{padding:10px 8px;font-size:12.5px}
+    td img.thumb{width:44px;height:44px}
+    td video.thumb-vid{width:80px;height:50px}
+    .topbar h1{font-size:14px}
+    .topbar .user-email{display:none}
+    .modal-body{padding:18px}
+    .modal-head,.modal-foot{padding:14px 18px}
+    .preview img{max-width:140px;max-height:140px}
+    .preview video{max-width:220px;max-height:150px}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <div class="brand">
+      <div class="icon">🔐</div>
+      <h1>Admin Panel</h1>
+      <p>Shree Saawariya Safe Company</p>
+    </div>
+    <label>Email</label>
+    <input type="email" id="loginEmail" placeholder="admin@example.com" autocomplete="email">
+    <label>Password</label>
+    <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    <button id="loginBtn">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="topbar">
+    <h1><span>⚙️</span> Admin Panel</h1>
+    <div class="actions">
+      <span class="user-email" id="userEmail"></span>
+      <a href="index.html" target="_blank">🌐 View Site</a>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <button data-page="slides" class="active">🎞️ Slides</button>
+      <button data-page="categories">📂 Categories</button>
+      <button data-page="products">📦 Products</button>
+      <button data-page="gallery">🖼️ Gallery</button>
+      <button data-page="videos">🎬 Videos</button>
+      <button data-page="testimonials">⭐ Testimonials</button>
+      <button data-page="about">ℹ️ About Section</button>
+      <button data-page="enquiries">📩 Enquiries</button>
+    </aside>
+
+    <main class="main">
+      <!-- SLIDES -->
+      <section class="page active" id="page-slides">
+        <div class="page-head">
+          <h2>Hero Slides <span class="count" id="slidesCount"></span></h2>
+          <button class="btn btn-accent" onclick="openSlideModal()">+ Add Slide</button>
+        </div>
+        <div class="table-wrap"><div id="slidesList"></div></div>
+      </section>
+
+      <!-- CATEGORIES -->
+      <section class="page" id="page-categories">
+        <div class="page-head">
+          <h2>Categories <span class="count" id="categoriesCount"></span></h2>
+          <button class="btn btn-accent" onclick="openCategoryModal()">+ Add Category</button>
+        </div>
+        <div class="table-wrap"><div id="categoriesList"></div></div>
+      </section>
+
+      <!-- PRODUCTS -->
+      <section class="page" id="page-products">
+        <div class="page-head">
+          <h2>Products <span class="count" id="productsCount"></span></h2>
+          <button class="btn btn-accent" onclick="openProductModal()">+ Add Product</button>
+        </div>
+        <div class="table-wrap"><div id="productsList"></div></div>
+      </section>
+
+      <!-- GALLERY -->
+      <section class="page" id="page-gallery">
+        <div class="page-head">
+          <h2>Gallery <span class="count" id="galleryCount"></span></h2>
+          <button class="btn btn-accent" onclick="openGalleryModal()">+ Add Image</button>
+        </div>
+        <div class="table-wrap"><div id="galleryList"></div></div>
+      </section>
+
+      <!-- VIDEOS -->
+      <section class="page" id="page-videos">
+        <div class="page-head">
+          <h2>Videos <span class="count" id="videosCount"></span></h2>
+          <button class="btn btn-accent" onclick="openVideoModal()">+ Add Video</button>
+        </div>
+        <div class="table-wrap"><div id="videosList"></div></div>
+      </section>
+
+      <!-- TESTIMONIALS -->
+      <section class="page" id="page-testimonials">
+        <div class="page-head">
+          <h2>Testimonials <span class="count" id="testimonialsCount"></span></h2>
+          <button class="btn btn-accent" onclick="openTestimonialModal()">+ Add Review</button>
+        </div>
+        <div class="table-wrap"><div id="testimonialsList"></div></div>
+      </section>
+
+      <!-- ABOUT -->
+      <section class="page" id="page-about">
+        <div class="page-head">
+          <h2>About Section</h2>
+          <button class="btn btn-outline" onclick="loadAbout()">🔄 Refresh</button>
+        </div>
+        <div class="form-card">
+          <div class="field">
+            <label class="lbl">About Image *</label>
+            <label class="upload-box" for="aboutImageInput" id="aboutUploadBox">
+              <div class="icon">📤</div>
+              <span class="label">Click to upload image</span>
+              <span class="sub">PNG, JPG, WEBP — max 5MB</span>
+              <input type="file" id="aboutImageInput" accept="image/*">
+            </label>
+            <div class="preview" id="aboutPreview" style="display:none">
+              <img id="aboutPreviewImg" src="" alt="" style="max-width:280px;max-height:220px">
+              <button class="remove" type="button" onclick="removeAboutImg()">×</button>
+            </div>
+            <input type="hidden" id="aboutImageUrl">
+          </div>
+
+          <div class="field">
+            <label class="lbl">Eyebrow (Small Label)</label>
+            <input type="text" id="aboutEyebrow" placeholder="About Our Company">
+          </div>
+
+          <div class="field">
+            <label class="lbl">Heading *</label>
+            <input type="text" id="aboutHeading" placeholder="Decades of Trust, Security & Craftsmanship">
+          </div>
+
+          <div class="field"><label class="lbl">Paragraph 1</label><textarea id="aboutP1" placeholder="First paragraph..."></textarea></div>
+          <div class="field"><label class="lbl">Paragraph 2</label><textarea id="aboutP2" placeholder="Second paragraph..."></textarea></div>
+          <div class="field"><label class="lbl">Paragraph 3</label><textarea id="aboutP3" placeholder="Third paragraph..."></textarea></div>
+
+          <div style="margin:24px 0 10px;font-size:14px;font-weight:700;color:var(--primary);border-top:1px solid var(--border);padding-top:20px">Stats (4 boxes)</div>
+
+          <div class="field-row">
+            <div class="field"><label class="lbl">Stat 1 Number</label><input type="text" id="aboutStat1Num" placeholder="25+"></div>
+            <div class="field"><label class="lbl">Stat 1 Label</label><input type="text" id="aboutStat1Lbl" placeholder="Years"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label class="lbl">Stat 2 Number</label><input type="text" id="aboutStat2Num" placeholder="50K+"></div>
+            <div class="field"><label class="lbl">Stat 2 Label</label><input type="text" id="aboutStat2Lbl" placeholder="Happy Clients"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label class="lbl">Stat 3 Number</label><input type="text" id="aboutStat3Num" placeholder="1.5L+"></div>
+            <div class="field"><label class="lbl">Stat 3 Label</label><input type="text" id="aboutStat3Lbl" placeholder="Units Sold"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label class="lbl">Stat 4 Number</label><input type="text" id="aboutStat4Num" placeholder="28"></div>
+            <div class="field"><label class="lbl">Stat 4 Label</label><input type="text" id="aboutStat4Lbl" placeholder="States"></div>
+          </div>
+
+          <div style="margin-top:20px">
+            <button class="btn btn-accent" id="aboutSaveBtn" onclick="saveAbout()">💾 Save About Section</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ENQUIRIES -->
+      <section class="page" id="page-enquiries">
+        <div class="page-head">
+          <h2>Enquiries <span class="count" id="enquiriesCount"></span></h2>
+          <button class="btn btn-outline" onclick="loadEnquiries()">🔄 Refresh</button>
+        </div>
+        <div class="table-wrap"><div id="enquiriesList"></div></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- MODAL: SLIDE -->
+<div class="overlay" id="slideModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="slideModalTitle">Add Slide</h3>
+      <button class="close" onclick="closeModal('slideModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="slideId">
+      <div class="field">
+        <label class="lbl">Slide Image *</label>
+        <label class="upload-box" for="slideImageInput" id="slideUploadBox">
+          <div class="icon">📤</div>
+          <span class="label">Click to upload image</span>
+          <span class="sub">PNG, JPG, WEBP — max 5MB</span>
+          <input type="file" id="slideImageInput" accept="image/*">
+        </label>
+        <div class="preview" id="slidePreview" style="display:none">
+          <img id="slidePreviewImg" src="" alt="">
+          <button class="remove" type="button" onclick="removeSlideImg()">×</button>
+        </div>
+        <input type="hidden" id="slideImageUrl">
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="lbl">Tag / Badge</label><input type="text" id="slideTag" placeholder="Featured, Bank Grade"></div>
+        <div class="field"><label class="lbl">Sort Order</label><input type="number" id="slideSort" value="0"></div>
+      </div>
+      <div class="field"><label class="lbl">Title *</label><input type="text" id="slideTitle" placeholder="Slide heading"></div>
+      <div class="field"><label class="lbl">Description</label><textarea id="slideDesc" placeholder="Slide description"></textarea></div>
+      <div class="field-row">
+        <div class="field"><label class="lbl">Button 1 Text</label><input type="text" id="slideBtn1Text" placeholder="View Products"></div>
+        <div class="field"><label class="lbl">Button 1 Link</label><input type="text" id="slideBtn1Link" placeholder="#products"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="lbl">Button 2 Text</label><input type="text" id="slideBtn2Text" placeholder="Enquiry"></div>
+        <div class="field"><label class="lbl">Button 2 Link</label><input type="text" id="slideBtn2Link" placeholder="https://wa.me/..."></div>
+      </div>
+      <div class="field"><label class="check-line"><input type="checkbox" id="slideActive" checked> Active (visible on site)</label></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('slideModal')">Cancel</button>
+      <button class="btn" id="slideSaveBtn" onclick="saveSlide()">Save Slide</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CATEGORY -->
+<div class="overlay" id="categoryModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="categoryModalTitle">Add Category</h3>
+      <button class="close" onclick="closeModal('categoryModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="categoryId">
+      <div class="field">
+        <label class="lbl">Category Image *</label>
+        <label class="upload-box" for="categoryImageInput" id="categoryUploadBox">
+          <div class="icon">📤</div>
+          <span class="label">Click to upload image</span>
+          <span class="sub">PNG, JPG, WEBP — max 5MB</span>
+          <input type="file" id="categoryImageInput" accept="image/*">
+        </label>
+        <div class="preview" id="categoryPreview" style="display:none">
+          <img id="categoryPreviewImg" src="" alt="">
+          <button class="remove" type="button" onclick="removeCategoryImg()">×</button>
+        </div>
+        <input type="hidden" id="categoryImageUrl">
+      </div>
+      <div class="field"><label class="lbl">Category Name *</label><input type="text" id="categoryName" placeholder="e.g. Jewelery Safe"></div>
+      <div class="field"><label class="lbl">Description</label><textarea id="categoryDesc" placeholder="Short description"></textarea></div>
+      <div class="field-row">
+        <div class="field"><label class="lbl">Sort Order</label><input type="number" id="categorySort" value="0"></div>
+        <div class="field"><label class="lbl">&nbsp;</label><label class="check-line"><input type="checkbox" id="categoryActive" checked> Active</label></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('categoryModal')">Cancel</button>
+      <button class="btn" id="categorySaveBtn" onclick="saveCategory()">Save Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PRODUCT -->
+<div class="overlay" id="productModal">
+  <div class="modal wide">
+    <div class="modal-head">
+      <h3 id="productModalTitle">Add Product</h3>
+      <button class="close" onclick="closeModal('productModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="productId">
+      <div class="field">
+        <label class="lbl">Main Image *</label>
+        <label class="upload-box" for="productImageInput" id="productUploadBox">
+          <div class="icon">📤</div>
+          <span class="label">Click to upload main image</span>
+          <span class="sub">PNG, JPG, WEBP — max 5MB</span>
+          <input type="file" id="productImageInput" accept="image/*">
+        </label>
+        <div class="preview" id="productPreview" style="display:none">
+          <img id="productPreviewImg" src="" alt="">
+          <button class="remove" type="button" onclick="removeProductImg()">×</button>
+        </div>
+        <input type="hidden" id="productImageUrl">
+      </div>
+
+      <div class="field">
+        <label class="lbl">Gallery Images</label>
+        <label class="upload-box" for="productGalleryInput" id="productGalleryUploadBox">
+          <div class="icon">🖼️</div>
+          <span class="label">Click to upload gallery images</span>
+          <span class="sub">Multiple files select kar sakte hain</span>
+          <input type="file" id="productGalleryInput" accept="image/*" multiple>
+        </label>
+        <div class="multi-preview" id="productGalleryPreview"></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label class="lbl">Product Name *</label><input type="text" id="productName" placeholder="e.g. Royal Jewel Safe — RJ 2424"></div>
+        <div class="field"><label class="lbl">Category</label>
+          <select id="productCategory"><option value="">Select category</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="lbl">Tag / Badge</label><input type="text" id="productTag" placeholder="Premium, Best Seller..."></div>
+        <div class="field"><label class="lbl">Price</label><input type="text" id="productPrice" placeholder="₹18,500"></div>
+      </div>
+      <div class="field"><label class="lbl">Specification</label><input type="text" id="productSpec" placeholder="Outer: 24×24×18 in · 3-shelf · Digital + Key"></div>
+      <div class="field-row-3">
+        <div class="field"><label class="lbl">Thickness</label><input type="text" id="productThickness" placeholder="6 mm"></div>
+        <div class="field"><label class="lbl">Height</label><input type="text" id="productHeight" placeholder="24 inch"></div>
+        <div class="field"><label class="lbl">Weight</label><input type="text" id="productWeight" placeholder="85 kg"></div>
+      </div>
+      <div class="field"><label class="lbl">Features (one per line)</label><textarea id="productFeatures" placeholder="6mm CRCA steel body&#10;Fire-resistant insulation&#10;Dual locking system"></textarea></div>
+      <div class="field-row">
+        <div class="field"><label class="lbl">Sort Order</label><input type="number" id="productSort" value="0"></div>
+        <div class="field"><label class="lbl">&nbsp;</label><label class="check-line"><input type="checkbox" id="productActive" checked> Active</label></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('productModal')">Cancel</button>
+      <button class="btn" id="productSaveBtn" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: GALLERY -->
+<div class="overlay" id="galleryModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="galleryModalTitle">Add Gallery Image</h3>
+      <button class="close" onclick="closeModal('galleryModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="galleryId">
+      <div class="field">
+        <label class="lbl">Image *</label>
+        <label class="upload-box" for="galleryImageInput" id="galleryUploadBox">
+          <div class="icon">📤</div>
+          <span class="label">Click to upload image</span>
+          <span class="sub">PNG, JPG, WEBP — max 5MB</span>
+          <input type="file" id="galleryImageInput" accept="image/*">
+        </label>
+        <div class="preview" id="galleryPreview" style="display:none">
+          <img id="galleryPreviewImg" src="" alt="">
+          <button class="remove" type="button" onclick="removeGalleryImg()">×</button>
+        </div>
+        <input type="hidden" id="galleryImageUrl">
+      </div>
+      <div class="field"><label class="lbl">Alt Text</label><input type="text" id="galleryAlt" placeholder="Short description"></div>
+      <div class="field-row">
+        <div class="field"><label class="lbl">Sort Order</label><input type="number" id="gallerySort" value="0"></div>
+        <div class="field"><label class="lbl">&nbsp;</label><label class="check-line"><input type="checkbox" id="galleryActive" checked> Active</label></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('galleryModal')">Cancel</button>
+      <button class="btn" id="gallerySaveBtn" onclick="saveGallery()">Save Image</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VIDEO (No thumbnail) -->
+<div class="overlay" id="videoModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="videoModalTitle">Add Video</h3>
+      <button class="close" onclick="closeModal('videoModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="videoId">
+      <div class="field">
+        <label class="lbl">Video File * (MP4 recommended)</label>
+        <label class="upload-box" for="videoFileInput" id="videoUploadBox">
+          <div class="icon">🎬</div>
+          <span class="label">Click to upload video</span>
+          <span class="sub">MP4, WEBM — max 50MB</span>
+          <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime">
+        </label>
+        <div class="preview" id="videoPreviewBox" style="display:none">
+          <video id="videoPreviewEl" controls muted playsinline></video>
+          <button class="remove" type="button" onclick="removeVideoFile()">×</button>
+        </div>
+        <input type="hidden" id="videoUrl">
+      </div>
+
+      <div class="field">
+        <label class="lbl">Ya phir Video URL paste karo</label>
+        <input type="text" id="videoUrlAlt" placeholder="https://...mp4">
+        <div class="hint">💡 Direct MP4 link paste kar do — file upload ki zarurat nahi</div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">Title / Caption</label>
+        <input type="text" id="videoTitle" placeholder="e.g. Safe Manufacturing Process">
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label class="lbl">Sort Order</label><input type="number" id="videoSort" value="0"></div>
+        <div class="field"><label class="lbl">&nbsp;</label><label class="check-line"><input type="checkbox" id="videoActive" checked> Active</label></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('videoModal')">Cancel</button>
+      <button class="btn" id="videoSaveBtn" onclick="saveVideo()">Save Video</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TESTIMONIAL -->
+<div class="overlay" id="testimonialModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="testimonialModalTitle">Add Review</h3>
+      <button class="close" onclick="closeModal('testimonialModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="testimonialId">
+      <div class="field">
+        <label class="lbl">Customer Photo (Optional)</label>
+        <label class="upload-box" for="testimonialImageInput" id="testimonialUploadBox">
+          <div class="icon">📤</div>
+          <span class="label">Click to upload photo</span>
+          <span class="sub">Nahi lagayi toh initials auto-generate honge</span>
+          <input type="file" id="testimonialImageInput" accept="image/*">
+        </label>
+        <div class="preview" id="testimonialPreview" style="display:none">
+          <img id="testimonialPreviewImg" src="" alt="">
+          <button class="remove" type="button" onclick="removeTestimonialImg()">×</button>
+        </div>
+        <input type="hidden" id="testimonialImageUrl">
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label class="lbl">Name *</label><input type="text" id="testimonialName" placeholder="Rajesh Kumar"></div>
+        <div class="field"><label class="lbl">Role / Designation</label><input type="text" id="testimonialRole" placeholder="Jewellery Shop Owner, Mumbai"></div>
+      </div>
+
+      <div class="field">
+        <label class="lbl">Rating *</label>
+        <div class="star-input" id="starInput">
+          <span data-val="1">★</span>
+          <span data-val="2">★</span>
+          <span data-val="3">★</span>
+          <span data-val="4">★</span>
+          <span data-val="5">★</span>
+        </div>
+        <input type="hidden" id="testimonialRating" value="5">
+      </div>
+
+      <div class="field">
+        <label class="lbl">Review *</label>
+        <textarea id="testimonialReview" placeholder="Customer ka review..."></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label class="lbl">Sort Order</label><input type="number" id="testimonialSort" value="0"></div>
+        <div class="field"><label class="lbl">&nbsp;</label><label class="check-line"><input type="checkbox" id="testimonialActive" checked> Active</label></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('testimonialModal')">Cancel</button>
+      <button class="btn" id="testimonialSaveBtn" onclick="saveTestimonial()">Save Review</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============ SUPABASE INIT ============ */
+const SUPABASE_URL = "https://ekegsluvwauzjrkurbki.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrZWdzbHV2d2F1empya3VyYmtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyOTMxODMsImV4cCI6MjEwNjg2OTE4M30.HXf3HT0WAGOa_JfhE6j0peJlzcokY_RuZq-L2zHyGxQ";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ============ HELPERS ============ */
+function toast(msg, type='success'){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  clearTimeout(window.__toastT);
+  window.__toastT = setTimeout(() => t.classList.remove('show'), 2800);
+}
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); });
+});
+
+/* ============ AUTH ============ */
+const loginWrap = document.getElementById('loginWrap');
+const appEl = document.getElementById('app');
+
+async function checkSession(){
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    loginWrap.style.display = 'none';
+    appEl.classList.add('active');
+    document.getElementById('userEmail').textContent = session.user.email;
+    loadAll();
+  } else {
+    loginWrap.style.display = 'flex';
+    appEl.classList.remove('active');
+  }
+}
+
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const err   = document.getElementById('loginError');
+  const btn   = document.getElementById('loginBtn');
+  err.textContent = '';
+  if (!email || !pass) { err.textContent = 'Email aur password daalein'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  btn.disabled = false; btn.textContent = 'Sign In';
+  if (error) { err.textContent = error.message; return; }
+  checkSession();
+});
+document.getElementById('loginPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('loginBtn').click();
+});
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await sb.auth.signOut();
+  location.reload();
+});
+
+/* ============ NAV ============ */
+document.querySelectorAll('.sidebar button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sidebar button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+  });
+});
+
+/* ============ FILE UPLOAD ============ */
+async function uploadFile(file, maxMB = 5){
+  if (!file) return null;
+  if (file.size > maxMB * 1024 * 1024) throw new Error(`File ${maxMB}MB se zyada hai`);
+  const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2,10)}.${ext}`;
+  const { error } = await sb.storage.from('media').upload(path, file, {
+    cacheControl: '3600', upsert: false, contentType: file.type
+  });
+  if (error) throw error;
+  const { data: { publicUrl } } = sb.storage.from('media').getPublicUrl(path);
+  return publicUrl;
+}
+
+/* ============ LOAD ALL ============ */
+async function loadAll(){
+  await Promise.all([
+    loadSlides(),
+    loadCategories(),
+    loadProducts(),
+    loadGallery(),
+    loadVideos(),
+    loadTestimonials(),
+    loadAbout(),
+    loadEnquiries()
+  ]);
+}
+
+/* ============ SLIDES ============ */
+let slidesData = [];
+async function loadSlides(){
+  const { data, error } = await sb.from('slides').select('*')
+    .order('sort_order', { ascending: true }).order('id', { ascending: true });
+  if (error) { toast('Load failed: ' + error.message, 'error'); return; }
+  slidesData = data || [];
+  document.getElementById('slidesCount').textContent = `(${slidesData.length})`;
+  const el = document.getElementById('slidesList');
+  if (!slidesData.length) { el.innerHTML = '<div class="empty">Koi slide nahi hai.</div>'; return; }
+  el.innerHTML = `<table><thead><tr>
+    <th>Image</th><th>Title</th><th>Tag</th><th>Order</th><th>Status</th><th>Actions</th>
+  </tr></thead><tbody>` + slidesData.map(s => `
+    <tr>
+      <td><img class="thumb" src="${esc(s.image_url)}" alt=""></td>
+      <td><strong>${esc(s.title)}</strong><br><span style="color:#5b6572;font-size:12px">${esc((s.description||'').slice(0,60))}${s.description && s.description.length>60?'…':''}</span></td>
+      <td>${esc(s.tag||'-')}</td>
+      <td>${s.sort_order}</td>
+      <td><span class="badge ${s.is_active?'badge-on':'badge-off'}">${s.is_active?'Active':'Hidden'}</span></td>
+      <td><div class="row-actions">
+        <button class="btn btn-sm btn-outline" onclick="editSlide(${s.id})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteSlide(${s.id})">Delete</button>
+      </div></td>
+    </tr>
+  `).join('') + `</tbody></table>`;
+}
+function resetSlideForm(){
+  ['slideId','slideImageUrl','slideTag','slideTitle','slideDesc','slideBtn1Text','slideBtn1Link','slideBtn2Text','slideBtn2Link'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('slideSort').value = 0;
+  document.getElementById('slideActive').checked = true;
+  document.getElementById('slidePreview').style.display = 'none';
+  document.getElementById('slideImageInput').value = '';
+  document.getElementById('slideBtn1Text').value = 'View Products';
+  document.getElementById('slideBtn1Link').value = '#products';
+  document.getElementById('slideBtn2Text').value = 'Enquiry';
+}
+function openSlideModal(){ resetSlideForm(); document.getElementById('slideModalTitle').textContent = 'Add Slide'; document.getElementById('slideModal').classList.add('active'); }
+function editSlide(id){
+  const s = slidesData.find(x => x.id === id); if (!s) return;
+  resetSlideForm();
+  document.getElementById('slideId').value = s.id;
+  document.getElementById('slideTag').value = s.tag || '';
+  document.getElementById('slideTitle').value = s.title || '';
+  document.getElementById('slideDesc').value = s.description || '';
+  document.getElementById('slideBtn1Text').value = s.btn1_text || '';
+  document.getElementById('slideBtn1Link').value = s.btn1_link || '';
+  document.getElementById('slideBtn2Text').value = s.btn2_text || '';
+  document.getElementById('slideBtn2Link').value = s.btn2_link || '';
+  document.getElementById('slideSort').value = s.sort_order || 0;
+  document.getElementById('slideActive').checked = !!s.is_active;
+  if (s.image_url){
+    document.getElementById('slideImageUrl').value = s.image_url;
+    document.getElementById('slidePreviewImg').src = s.image_url;
+    document.getElementById('slidePreview').style.display = 'inline-block';
+  }
+  document.getElementById('slideModalTitle').textContent = 'Edit Slide';
+  document.getElementById('slideModal').classList.add('active');
+}
+function removeSlideImg(){
+  document.getElementById('slideImageUrl').value = '';
+  document.getElementById('slidePreview').style.display = 'none';
+  document.getElementById('slideImageInput').value = '';
+}
+document.getElementById('slideImageInput').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  const box = document.getElementById('slideUploadBox'); box.classList.add('uploading');
+  try {
+    toast('Uploading...');
+    const url = await uploadFile(file);
+    document.getElementById('slideImageUrl').value = url;
+    document.getElementById('slidePreviewImg').src = url;
+    document.getElementById('slidePreview').style.display = 'inline-block';
+    toast('Image uploaded ✓');
+  } catch(err){ toast('Upload failed: ' + err.message, 'error'); }
+  box.classList.remove('uploading');
+});
+async function saveSlide(){
+  const btn = document.getElementById('slideSaveBtn');
+  const id = document.getElementById('slideId').value;
+  const imageUrl = document.getElementById('slideImageUrl').value;
+  const title = document.getElementById('slideTitle').value.trim();
+  if (!title) { toast('Title required', 'error'); return; }
+  if (!imageUrl) { toast('Image upload karein', 'error'); return; }
+  const payload = {
+    tag: document.getElementById('slideTag').value.trim() || null,
+    title,
+    description: document.getElementById('slideDesc').value.trim() || null,
+    image_url: imageUrl,
+    btn1_text: document.getElementById('slideBtn1Text').value.trim() || null,
+    btn1_link: document.getElementById('slideBtn1Link').value.trim() || null,
+    btn2_text: document.getElementById('slideBtn2Text').value.trim() || null,
+    btn2_link: document.getElementById('slideBtn2Link').value.trim() || null,
+    sort_order: parseInt(document.getElementById('slideSort').value) || 0,
+    is_active: document.getElementById('slideActive').checked,
+  };
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...';
+  const { error } = id
+    ? await sb.from('slides').update(payload).eq('id', id)
+    : await sb.from('slides').insert([payload]);
+  btn.disabled = false; btn.textContent = 'Save Slide';
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  closeModal('slideModal'); toast('Slide saved ✓'); loadSlides();
+}
+async function deleteSlide(id){
+  if (!confirm('Delete this slide?')) return;
+  const { error } = await sb.from('slides').delete().eq('id', id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast('Deleted'); loadSlides();
+}
+
+/* ============ CATEGORIES ============ */
+let categoriesData = [];
+async function loadCategories(){
+  const { data, error } = await sb.from('categories').select('*')
+    .order('sort_order', { ascending: true }).order('id', { ascending: true });
+  if (error) { toast('Load failed: ' + error.message, 'error'); return; }
+  categoriesData = data || [];
+  document.getElementById('categoriesCount').textContent = `(${categoriesData.length})`;
+  const el = document.getElementById('categoriesList');
+  if (!categoriesData.length) { el.innerHTML = '<div class="empty">Koi category nahi hai.</div>'; }
+  else {
+    el.innerHTML = `<table><thead><tr>
+      <th>Image</th><th>Name</th><th>Description</th><th>Order</th><th>Status</th><th>Actions</th>
+    </tr></thead><tbody>` + categoriesData.map(c => `
+      <tr>
+        <td><img class="thumb" src="${esc(c.image_url)}" alt=""></td>
+        <td><strong>${esc(c.name)}</strong></td>
+        <td>${esc((c.description||'').slice(0,80))}</td>
+        <td>${c.sort_order}</td>
+        <td><span class="badge ${c.is_active?'badge-on':'badge-off'}">${c.is_active?'Active':'Hidden'}</span></td>
+        <td><div class="row-actions">
+          <button class="btn btn-sm btn-outline" onclick="editCategory(${c.id})">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteCategory(${c.id})">Delete</button>
+        </div></td>
+      </tr>
+    `).join('') + `</tbody></table>`;
+  }
+  const sel = document.getElementById('productCategory');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Select category</option>' + categoriesData.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+  sel.value = cur;
+}
+function resetCategoryForm(){
+  ['categoryId','categoryImageUrl','categoryName','categoryDesc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('categorySort').value = 0;
+  document.getElementById('categoryActive').checked = true;
+  document.getElementById('categoryPreview').style.display = 'none';
+  document.getElementById('categoryImageInput').value = '';
+}
+function openCategoryModal(){ resetCategoryForm(); document.getElementById('categoryModalTitle').textContent = 'Add Category'; document.getElementById('categoryModal').classList.add('active'); }
+function editCategory(id){
+  const c = categoriesData.find(x => x.id === id); if (!c) return;
+  resetCategoryForm();
+  document.getElementById('categoryId').value = c.id;
+  document.getElementById('categoryName').value = c.name || '';
+  document.getElementById('categoryDesc').value = c.description || '';
+  document.getElementById('categorySort').value = c.sort_order || 0;
+  document.getElementById('categoryActive').checked = !!c.is_active;
+  if (c.image_url){
+    document.getElementById('categoryImageUrl').value = c.image_url;
+    document.getElementById('categoryPreviewImg').src = c.image_url;
+    document.getElementById('categoryPreview').style.display = 'inline-block';
+  }
+  document.getElementById('categoryModalTitle').textContent = 'Edit Category';
+  document.getElementById('categoryModal').classList.add('active');
+}
+function removeCategoryImg(){
+  document.getElementById('categoryImageUrl').value = '';
+  document.getElementById('categoryPreview').style.display = 'none';
+  document.getElementById('categoryImageInput').value = '';
+}
+document.getElementById('categoryImageInput').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  const box = document.getElementById('categoryUploadBox'); box.classList.add('uploading');
+  try {
+    toast('Uploading...');
+    const url = await uploadFile(file);
+    document.getElementById('categoryImageUrl').value = url;
+    document.getElementById('categoryPreviewImg').src = url;
+    document.getElementById('categoryPreview').style.display = 'inline-block';
+    toast('Image uploaded ✓');
+  } catch(err){ toast('Upload failed: ' + err.message, 'error'); }
+  box.classList.remove('uploading');
+});
+async function saveCategory(){
+  const btn = document.getElementById('categorySaveBtn');
+  const id = document.getElementById('categoryId').value;
+  const name = document.getElementById('categoryName').value.trim();
+  const img = document.getElementById('categoryImageUrl').value;
+  if (!name) { toast('Name required', 'error'); return; }
+  if (!img) { toast('Image upload karein', 'error'); return; }
+  const payload = {
+    name,
+    description: document.getElementById('categoryDesc').value.trim() || null,
+    image_url: img,
+    sort_order: parseInt(document.getElementById('categorySort').value) || 0,
+    is_active: document.getElementById('categoryActive').checked,
+  };
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...';
+  const { error } = id
+    ? await sb.from('categories').update(payload).eq('id', id)
+    : await sb.from('categories').insert([payload]);
+  btn.disabled = false; btn.textContent = 'Save Category';
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  closeModal('categoryModal'); toast('Category saved ✓'); loadCategories();
+}
+async function deleteCategory(id){
+  if (!confirm('Delete this category?')) return;
+  const { error } = await sb.from('categories').delete().eq('id', id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast('Deleted'); loadCategories();
+}
+
+/* ============ PRODUCTS ============ */
+let productsData = [];
+let productGalleryUrls = [];
+async function loadProducts(){
+  const { data, error } = await sb.from('products').select('*')
+    .order('sort_order', { ascending: true }).order('id', { ascending: true });
+  if (error) { toast('Load failed: ' + error.message, 'error'); return; }
+  productsData = data || [];
+  document.getElementById('productsCount').textContent = `(${productsData.length})`;
+  const el = document.getElementById('productsList');
+  if (!productsData.length) { el.innerHTML = '<div class="empty">Koi product nahi hai.</div>'; return; }
+  el.innerHTML = `<table><thead><tr>
+    <th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Order</th><th>Status</th><th>Actions</th>
+  </tr></thead><tbody>` + productsData.map(p => `
+    <tr>
+      <td><img class="thumb" src="${esc(p.image_url)}" alt=""></td>
+      <td><strong>${esc(p.name)}</strong><br><span style="color:#5b6572;font-size:12px">${esc(p.tag||'')}</span></td>
+      <td>${esc(p.category||'-')}</td>
+      <td>${esc(p.price||'-')}</td>
+      <td>${p.sort_order}</td>
+      <td><span class="badge ${p.is_active?'badge-on':'badge-off'}">${p.is_active?'Active':'Hidden'}</span></td>
+      <td><div class="row-actions">
+        <button class="btn btn-sm btn-outline" onclick="editProduct(${p.id})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">Delete</button>
+      </div></td>
+    </tr>
+  `).join('') + `</tbody></table>`;
+}
+function resetProductForm(){
+  ['productId','productImageUrl','productName','productTag','productPrice','productSpec','productThickness','productHeight','productWeight','productFeatures'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('productCategory').value = '';
+  document.getElementById('productSort').value = 0;
+  document.getElementById('productActive').checked = true;
+  document.getElementById('productPreview').style.display = 'none';
+  document.getElementById('productImageInput').value = '';
+  document.getElementById('productGalleryInput').value = '';
+  productGalleryUrls = [];
+  renderProductGalleryPreview();
+}
+function renderProductGalleryPreview(){
+  const el = document.getElementById('productGalleryPreview');
+  if (!productGalleryUrls.length) { el.innerHTML = ''; return; }
+  el.innerHTML = productGalleryUrls.map((u,i) => `
+    <div class="item">
+      <img src="${esc(u)}" alt="">
+      <button class="remove" type="button" onclick="removeProductGalleryImg(${i})">×</button>
+    </div>
+  `).join('');
+}
+function removeProductGalleryImg(i){ productGalleryUrls.splice(i,1); renderProductGalleryPreview(); }
+function openProductModal(){ resetProductForm(); document.getElementById('productModalTitle').textContent = 'Add Product'; document.getElementById('productModal').classList.add('active'); }
+function editProduct(id){
+  const p = productsData.find(x => x.id === id); if (!p) return;
+  resetProductForm();
+  document.getElementById('productId').value = p.id;
+  document.getElementById('productName').value = p.name || '';
+  document.getElementById('productTag').value = p.tag || '';
+  document.getElementById('productPrice').value = p.price || '';
+  document.getElementById('productSpec').value = p.spec || '';
+  document.getElementById('productThickness').value = p.thickness || '';
+  document.getElementById('productHeight').value = p.height || '';
+  document.getElementById('productWeight').value = p.weight || '';
+  document.getElementById('productCategory').value = p.category || '';
+  document.getElementById('productFeatures').value = Array.isArray(p.features) ? p.features.join('\n') : '';
+  document.getElementById('productSort').value = p.sort_order || 0;
+  document.getElementById('productActive').checked = !!p.is_active;
+  if (p.image_url){
+    document.getElementById('productImageUrl').value = p.image_url;
+    document.getElementById('productPreviewImg').src = p.image_url;
+    document.getElementById('productPreview').style.display = 'inline-block';
+  }
+  productGalleryUrls = Array.isArray(p.gallery) ? [...p.gallery] : [];
+  renderProductGalleryPreview();
+  document.getElementById('productModalTitle').textContent = 'Edit Product';
+  document.getElementById('productModal').classList.add('active');
+}
+function removeProductImg(){
+  document.getElementById('productImageUrl').value = '';
+  document.getElementById('productPreview').style.display = 'none';
+  document.getElementById('productImageInput').value = '';
+}
+document.getElementById('productImageInput').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  const box = document.getElementById('productUploadBox'); box.classList.add('uploading');
+  try {
+    toast('Uploading...');
+    const url = await uploadFile(file);
+    document.getElementById('productImageUrl').value = url;
+    document.getElementById('productPreviewImg').src = url;
+    document.getElementById('productPreview').style.display = 'inline-block';
+    toast('Image uploaded ✓');
+  } catch(err){ toast('Upload failed: ' + err.message, 'error'); }
+  box.classList.remove('uploading');
+});
+document.getElementById('productGalleryInput').addEventListener('change', async e => {
+  const files = Array.from(e.target.files || []); if (!files.length) return;
+  const box = document.getElementById('productGalleryUploadBox'); box.classList.add('uploading');
+  try {
+    toast(`Uploading ${files.length} image(s)...`);
+    for (const f of files){
+      const url = await uploadFile(f);
+      productGalleryUrls.push(url);
+    }
+    renderProductGalleryPreview();
+    toast('Gallery uploaded ✓');
+  } catch(err){ toast('Upload failed: ' + err.message, 'error'); }
+  box.classList.remove('uploading');
+  e.target.value = '';
+});
+async function saveProduct(){
+  const btn = document.getElementById('productSaveBtn');
+  const id = document.getElementById('productId').value;
+  const name = document.getElementById('productName').value.trim();
+  const img = document.getElementById('productImageUrl').value;
+  if (!name) { toast('Name required', 'error'); return; }
+  if (!img) { toast('Main image upload karein', 'error'); return; }
+  const features = document.getElementById('productFeatures').value.split('\n').map(s => s.trim()).filter(Boolean);
+  const payload = {
+    name,
+    category: document.getElementById('productCategory').value.trim() || null,
+    tag: document.getElementById('productTag').value.trim() || null,
+    price: document.getElementById('productPrice').value.trim() || null,
+    spec: document.getElementById('productSpec').value.trim() || null,
+    thickness: document.getElementById('productThickness').value.trim() || null,
+    height: document.getElementById('productHeight').value.trim() || null,
+    weight: document.getElementById('productWeight').value.trim() || null,
+    image_url: img,
+    gallery: productGalleryUrls,
+    features,
+    sort_order: parseInt(document.getElementById('productSort').value) || 0,
+    is_active: document.getElementById('productActive').checked,
+  };
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...';
+  const { error } = id
+    ? await sb.from('products').update(payload).eq('id', id)
+    : await sb.from('products').insert([payload]);
+  btn.disabled = false; btn.textContent = 'Save Product';
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  closeModal('productModal'); toast('Product saved ✓'); loadProducts();
+}
+async function deleteProduct(id){
+  if (!confirm('Delete this product?')) return;
+  const { error } = await sb.from('products').delete().eq('id', id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast('Deleted'); loadProducts();
+}
+
+/* ============ GALLERY ============ */
+let galleryData = [];
+async function loadGallery(){
+  const { data, error } = await sb.from('gallery').select('*')
+    .order('sort_order', { ascending: true }).order('id', { ascending: true });
+  if (error) { toast('Load failed: ' + error.message, 'error'); return; }
+  galleryData = data || [];
+  document.getElementById('galleryCount').textContent = `(${galleryData.length})`;
+  const el = document.getElementById('galleryList');
+  if (!galleryData.length) { el.innerHTML = '<div class="empty">Koi gallery image nahi hai.</div>'; return; }
+  el.innerHTML = `<table><thead><tr>
+    <th>Image</th><th>Alt</th><th>Order</th><th>Status</th><th>Actions</th>
+  </tr></thead><tbody>` + galleryData.map(g => `
+    <tr>
+      <td><img class="thumb" src="${esc(g.image_url)}" alt=""></td>
+      <td>${esc(g.alt||'-')}</td>
+      <td>${g.sort_order}</td>
+      <td><span class="badge ${g.is_active?'badge-on':'badge-off'}">${g.is_active?'Active':'Hidden'}</span></td>
+      <td><div class="row-actions">
+        <button class="btn btn-sm btn-outline" onclick="editGallery(${g.id})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteGallery(${g.id})">Delete</button>
+      </div></td>
+    </tr>
+  `).join('') + `</tbody></table>`;
+}
+function resetGalleryForm(){
+  ['galleryId','galleryImageUrl','galleryAlt'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('gallerySort').value = 0;
+  document.getElementById('galleryActive').checked = true;
+  document.getElementById('galleryPreview').style.display = 'none';
+  document.getElementById('galleryImageInput').value = '';
+}
+function openGalleryModal(){ resetGalleryForm(); document.getElementById('galleryModalTitle').textContent = 'Add Gallery Image'; document.getElementById('galleryModal').classList.add('active'); }
+function editGallery(id){
+  const g = galleryData.find(x => x.id === id); if (!g) return;
+  resetGalleryForm();
+  document.getElementById('galleryId').value = g.id;
+  document.getElementById('galleryAlt').value = g.alt || '';
+  document.getElementById('gallerySort').value = g.sort_order || 0;
+  document.getElementById('galleryActive').checked = !!g.is_active;
+  if (g.image_url){
+    document.getElementById('galleryImageUrl').value = g.image_url;
+    document.getElementById('galleryPreviewImg').src = g.image_url;
+    document.getElementById('galleryPreview').style.display = 'inline-block';
+  }
+  document.getElementById('galleryModalTitle').textContent = 'Edit Gallery Image';
+  document.getElementById('galleryModal').classList.add('active');
+}
+function removeGalleryImg(){
+  document.getElementById('galleryImageUrl').value = '';
+  document.getElementById('galleryPreview').style.display = 'none';
+  document.getElementById('galleryImageInput').value = '';
+}
+document.getElementById('galleryImageInput').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  const box = document.getElementById('galleryUploadBox'); box.classList.add('uploading');
+  try {
+    toast('Uploading...');
+    const url = await uploadFile(file);
+    document.getElementById('galleryImageUrl').value = url;
+    document.getElementById('galleryPreviewImg').src = url;
+    document.getElementById('galleryPreview').style.display = 'inline-block';
+    toast('Image uploaded ✓');
+  } catch(err){ toast('Upload failed: ' + err.message, 'error'); }
+  box.classList.remove('uploading');
+});
+async function saveGallery(){
+  const btn = document.getElementById('gallerySaveBtn');
+  const id = document.getElementById('galleryId').value;
+  const img = document.getElementById('galleryImageUrl').value;
+  if (!img) { toast('Image upload karein', 'error'); return; }
+  const payload = {
+    image_url: img,
+    alt: document.getElementById('galleryAlt').value.trim() || null,
+    sort_order: parseInt(document.getElementById('gallerySort').value) || 0,
+    is_active: document.getElementById('galleryActive').checked,
+  };
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...';
+  const { error } = id
+    ? await sb.from('gallery').update(payload).eq('id', id)
+    : await sb.from('gallery').insert([payload]);
+  btn.disabled = false; btn.textContent = 'Save Image';
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  closeModal('galleryModal'); toast('Gallery saved ✓'); loadGallery();
+}
+async function deleteGallery(id){
+  if (!confirm('Delete this image?')) return;
+  const { error } = await sb.from('gallery').delete().eq('id', id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast('Deleted'); loadGallery();
+}
+
+/* ============ VIDEOS (No thumbnail) ============ */
+let videosData = [];
+async function loadVideos(){
+  const { data, error } = await sb.from('videos').select('*')
+    .order('sort_order', { ascending: true }).order('id', { ascending: true });
+  if (error) { toast('Load failed: ' + error.message, 'error'); return; }
+  videosData = data || [];
+  document.getElementById('videosCount').textContent = `(${videosData.length})`;
+  const el = document.getElementById('videosList');
+  if (!videosData.length) { el.innerHTML = '<div class="empty">Koi video nahi hai. "+ Add Video" click karo.</div>'; return; }
+  el.innerHTML = `<table><thead><tr>
+    <th>Video Preview</th><th>Title</th><th>Order</th><th>Status</th><th>Actions</th>
+  </tr></thead><tbody>` + videosData.map(v => `
+    <tr>
+      <td><video class="thumb-vid" src="${esc(v.video_url)}" muted playsinline preload="metadata"></video></td>
+      <td><strong>${esc(v.title||'Untitled')}</strong></td>
+      <td>${v.sort_order}</td>
+      <td><span class="badge ${v.is_active?'badge-on':'badge-off'}">${v.is_active?'Active':'Hidden'}</span></td>
+      <td><div class="row-actions">
+        <button class="btn btn-sm btn-outline" onclick="editVideo(${v.id})">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteVideo(${v.id})">Delete</button>
+      </div></td>
+    </tr>
+  `).join('') + `</tbody></table>`;
+}
+function resetVideoForm(){
+  ['videoId','videoUrl','videoUrlAlt','videoTitle'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('videoSort').value = 0;
+  document.getElementById('videoActive').checked = true;
+  document.getElementById('videoPreviewBox').style.display = 'none';
+  document.getElementById('videoFileInput').value = '';
+  const vid = document.getElementById('videoPreviewEl');
+  vid.removeAttribute('src'); vid.load();
+}
+function openVideoModal(){ resetVideoForm(); document.getElementById('videoModalTitle').textContent = 'Add Video'; document.getElementById('videoModal').classList.add('active'); }
+function editVideo(id){
+  const v = videosData.find(x => x.id === id); if (!v) return;
+  resetVideoForm();
+  document.getElementById('videoId').value = v.id;
+  document.getElementById('videoUrl').value = v.video_url || '';
+  document.getElementById('videoTitle').value = v.title || '';
+  document.getElementById('videoSort').value = v.sort_order || 0;
+  document.getElementById('videoActive').checked = !!v.is_active;
+  if (v.video_url){
+    document.getElementById('videoPreviewEl').src = v.video_url;
+    document.getElementById('videoPreviewBox').style.display = 'inline-block';
+  }
+  document.getElementById('videoModalTitle').textContent = 'Edit Video';
+  document.getElementById('videoModal').classList.add('active');
+}
+function removeVideoFile(){
+  document.getElementById('videoUrl').value = '';
+  document.getElementById('videoPreviewBox').style.display = 'none';
+  document.getElementById('videoFileInput').value = '';
+  const vid = document.getElementById('videoPreviewEl');
+  vid.removeAttribute('src'); vid.load();
+}
+document.getElementById('videoFileInput').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  const box = document.getElementById('videoUploadBox'); box.classList.add('uploading');
+  try {
+    toast('Video uploading... (thoda time lagega)');
+    const url = await uploadFile(file, 50);
+    document.getElementById('videoUrl').value = url;
+    document.getElementById('videoPreviewEl').src = url;
+    document.getElementById('videoPreviewBox').style.display = 'inline-block';
+    toast('Video uploaded ✓');
+  } catch(err){ toast('Upload failed: ' + err.message, 'error'); }
+  box.classList.remove('uploading');
+});
+async function saveVideo(){
+  const btn = document.getElementById('videoSaveBtn');
+  const id = document.getElementById('videoId').value;
+  const fileUrl = document.getElementById('videoUrl').value;
+  const altUrl = document.getElementById('videoUrlAlt').value.trim();
+  const finalUrl = fileUrl || altUrl;
+  if (!finalUrl) { toast('Video upload karein ya URL daalein', 'error'); return; }
+  const payload = {
+    video_url: finalUrl,
+    thumbnail_url: null,
+    title: document.getElementById('videoTitle').value.trim() || null,
+    sort_order: parseInt(document.getElementById('videoSort').value) || 0,
+    is_active: document.getElementById('videoActive').checked,
+  };
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...';
+  const { error } = id
+    ? await sb.from('videos').update(payload).eq('id', id)
+    : await sb.from('videos').insert([payload]);
+  btn.disabled = false; btn.textContent = 'Save Video';
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  closeModal('videoModal'); toast('Video saved ✓'); loadVideos();
+}
+async function deleteVideo(id){
+  if (!confirm('Delete this video?')) return;
+  const { error } = await sb.from('videos').delete().eq('id', id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast('Deleted'); loadVideos();
+}
+
+/* ============ TESTIMONIALS ============ */
+let testimonialsData = [];
+let testimonialRating = 5;
+
+async function loadTestimonials(){
+  const { data, error } = await sb.from('testimonials').select('*')
+    .order('sort_order', { ascending: true }).order('id', { ascending: true });
+  if (error) { toast('Load failed: ' + error.message, 'error'); return; }
+  testimonialsData = data || [];
+  document.getElementById('testimonialsCount').textContent = `(${testimonialsData.length})`;
+  const el = document.getElementById('testimonialsList');
+  if (!testimonialsData.length) { el.innerHTML = '<div class="empty">Koi review nahi hai. "+ Add Review" click karo.</div>'; return; }
+  el.innerHTML = `<table><thead><tr>
+    <th>Photo</th><th>Name</th><th>Role</th><th>Rating</th><th>Review</th><th>Order</th><th>Status</th><th>Actions</th>
+  </tr></thead><tbody>` + testimonialsData.map(t => {
+    const stars = '★'.repeat(Math.max(0, Math.min(5, Number(t.rating)||5)));
+    const avatar = t.image_url
+      ? `<img class="thumb" style="width:44px;height:44px;border-radius:50%" src="${esc(t.image_url)}" alt="">`
+      : `<div style="width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">${esc((t.name||'?')[0].toUpperCase())}</div>`;
+    return `
+      <tr>
+        <td>${avatar}</td>
+        <td><strong>${esc(t.name)}</strong></td>
+        <td>${esc(t.role||'-')}</td>
+        <td><span class="stars-mini">${stars}</span></td>
+        <td style="max-width:280px">${esc((t.review||'').slice(0,100))}${t.review && t.review.length>100?'…':''}</td>
+        <td>${t.sort_order}</td>
+        <td><span class="badge ${t.is_active?'badge-on':'badge-off'}">${t.is_active?'Active':'Hidden'}</span></td>
+        <td><div class="row-actions">
+          <button class="btn btn-sm btn-outline" onclick="editTestimonial(${t.id})">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteTestimonial(${t.id})">Delete</button>
+        </div></td>
+      </tr>
+    `;
+  }).join('') + `</tbody></table>`;
+}
+
+function updateStarInput(val){
+  testimonialRating = val;
+  document.getElementById('testimonialRating').value = val;
+  document.querySelectorAll('#starInput span').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+  });
+}
+document.querySelectorAll('#starInput span').forEach(s => {
+  s.addEventListener('click', () => updateStarInput(parseInt(s.dataset.val)));
+  s.addEventListener('mouseenter', () => {
+    const v = parseInt(s.dataset.val);
+    document.querySelectorAll('#starInput span').forEach(x => {
+      x.style.color = parseInt(x.dataset.val) <= v ? '#f58220' : '#d1d5db';
+    });
+  });
+});
+document.getElementById('starInput').addEventListener('mouseleave', () => {
+  document.querySelectorAll('#starInput span').forEach(x => { x.style.color = ''; });
+  updateStarInput(testimonialRating);
+});
+
+function resetTestimonialForm(){
+  ['testimonialId','testimonialImageUrl','testimonialName','testimonialRole','testimonialReview'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('testimonialSort').value = 0;
+  document.getElementById('testimonialActive').checked = true;
+  document.getElementById('testimonialPreview').style.display = 'none';
+  document.getElementById('testimonialImageInput').value = '';
+  updateStarInput(5);
+}
+function openTestimonialModal(){ resetTestimonialForm(); document.getElementById('testimonialModalTitle').textContent = 'Add Review'; document.getElementById('testimonialModal').classList.add('active'); }
+function editTestimonial(id){
+  const t = testimonialsData.find(x => x.id === id); if (!t) return;
+  resetTestimonialForm();
+  document.getElementById('testimonialId').value = t.id;
+  document.getElementById('testimonialName').value = t.name || '';
+  document.getElementById('testimonialRole').value = t.role || '';
+  document.getElementById('testimonialReview').value = t.review || '';
+  document.getElementById('testimonialSort').value = t.sort_order || 0;
+  document.getElementById('testimonialActive').checked = !!t.is_active;
+  updateStarInput(Number(t.rating) || 5);
+  if (t.image_url){
+    document.getElementById('testimonialImageUrl').value = t.image_url;
+    document.getElementById('testimonialPreviewImg').src = t.image_url;
+    document.getElementById('testimonialPreview').style.display = 'inline-block';
+  }
+  document.getElementById('testimonialModalTitle').textContent = 'Edit Review';
+  document.getElementById('testimonialModal').classList.add('active');
+}
+function removeTestimonialImg(){
+  document.getElementById('testimonialImageUrl').value = '';
+  document.getElementById('testimonialPreview').style.display = 'none';
+  document.getElementById('testimonialImageInput').value = '';
+}
+document.getElementById('testimonialImageInput').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  const box = document.getElementById('testimonialUploadBox'); box.classList.add('uploading');
+  try {
+    toast('Uploading...');
+    const url = await uploadFile(file);
+    document.getElementById('testimonialImageUrl').value = url;
+    document.getElementById('testimonialPreviewImg').src = url;
+    document.getElementById('testimonialPreview').style.display = 'inline-block';
+    toast('Image uploaded ✓');
+  } catch(err){ toast('Upload failed: ' + err.message, 'error'); }
+  box.classList.remove('uploading');
+});
+async function saveTestimonial(){
+  const btn = document.getElementById('testimonialSaveBtn');
+  const id = document.getElementById('testimonialId').value;
+  const name = document.getElementById('testimonialName').value.trim();
+  const review = document.getElementById('testimonialReview').value.trim();
+  if (!name) { toast('Name required', 'error'); return; }
+  if (!review) { toast('Review required', 'error'); return; }
+  const payload = {
+    name,
+    role: document.getElementById('testimonialRole').value.trim() || null,
+    review,
+    rating: parseInt(document.getElementById('testimonialRating').value) || 5,
+    image_url: document.getElementById('testimonialImageUrl').value.trim() || null,
+    sort_order: parseInt(document.getElementById('testimonialSort').value) || 0,
+    is_active: document.getElementById('testimonialActive').checked,
+  };
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...';
+  const { error } = id
+    ? await sb.from('testimonials').update(payload).eq('id', id)
+    : await sb.from('testimonials').insert([payload]);
+  btn.disabled = false; btn.textContent = 'Save Review';
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  closeModal('testimonialModal'); toast('Review saved ✓'); loadTestimonials();
+}
+async function deleteTestimonial(id){
+  if (!confirm('Delete this review?')) return;
+  const { error } = await sb.from('testimonials').delete().eq('id', id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast('Deleted'); loadTestimonials();
+}
+
+/* ============ ABOUT ============ */
+async function loadAbout(){
+  const { data, error } = await sb.from('about_section').select('*').eq('id', 1).maybeSingle();
+  if (error) { console.error('About load error:', error); return; }
+  if (!data) return;
+
+  document.getElementById('aboutEyebrow').value = data.eyebrow || '';
+  document.getElementById('aboutHeading').value = data.heading || '';
+  document.getElementById('aboutP1').value = data.paragraph1 || '';
+  document.getElementById('aboutP2').value = data.paragraph2 || '';
+  document.getElementById('aboutP3').value = data.paragraph3 || '';
+  document.getElementById('aboutStat1Num').value = data.stat1_num || '';
+  document.getElementById('aboutStat1Lbl').value = data.stat1_lbl || '';
+  document.getElementById('aboutStat2Num').value = data.stat2_num || '';
+  document.getElementById('aboutStat2Lbl').value = data.stat2_lbl || '';
+  document.getElementById('aboutStat3Num').value = data.stat3_num || '';
+  document.getElementById('aboutStat3Lbl').value = data.stat3_lbl || '';
+  document.getElementById('aboutStat4Num').value = data.stat4_num || '';
+  document.getElementById('aboutStat4Lbl').value = data.stat4_lbl || '';
+
+  if (data.image_url){
+    document.getElementById('aboutImageUrl').value = data.image_url;
+    document.getElementById('aboutPreviewImg').src = data.image_url;
+    document.getElementById('aboutPreview').style.display = 'inline-block';
+  } else {
+    document.getElementById('aboutImageUrl').value = '';
+    document.getElementById('aboutPreview').style.display = 'none';
+  }
+}
+function removeAboutImg(){
+  document.getElementById('aboutImageUrl').value = '';
+  document.getElementById('aboutPreview').style.display = 'none';
+  document.getElementById('aboutImageInput').value = '';
+}
+document.getElementById('aboutImageInput').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  const box = document.getElementById('aboutUploadBox'); box.classList.add('uploading');
+  try {
+    toast('Uploading...');
+    const url = await uploadFile(file);
+    document.getElementById('aboutImageUrl').value = url;
+    document.getElementById('aboutPreviewImg').src = url;
+    document.getElementById('aboutPreview').style.display = 'inline-block';
+    toast('Image uploaded ✓');
+  } catch(err){ toast('Upload failed: ' + err.message, 'error'); }
+  box.classList.remove('uploading');
+});
+async function saveAbout(){
+  const btn = document.getElementById('aboutSaveBtn');
+  const img = document.getElementById('aboutImageUrl').value;
+  const heading = document.getElementById('aboutHeading').value.trim();
+  if (!heading) { toast('Heading required', 'error'); return; }
+  if (!img) { toast('Image upload karein', 'error'); return; }
+  const payload = {
+    id: 1,
+    eyebrow: document.getElementById('aboutEyebrow').value.trim() || null,
+    heading,
+    paragraph1: document.getElementById('aboutP1').value.trim() || null,
+    paragraph2: document.getElementById('aboutP2').value.trim() || null,
+    paragraph3: document.getElementById('aboutP3').value.trim() || null,
+    image_url: img,
+    stat1_num: document.getElementById('aboutStat1Num').value.trim() || null,
+    stat1_lbl: document.getElementById('aboutStat1Lbl').value.trim() || null,
+    stat2_num: document.getElementById('aboutStat2Num').value.trim() || null,
+    stat2_lbl: document.getElementById('aboutStat2Lbl').value.trim() || null,
+    stat3_num: document.getElementById('aboutStat3Num').value.trim() || null,
+    stat3_lbl: document.getElementById('aboutStat3Lbl').value.trim() || null,
+    stat4_num: document.getElementById('aboutStat4Num').value.trim() || null,
+    stat4_lbl: document.getElementById('aboutStat4Lbl').value.trim() || null,
+    updated_at: new Date().toISOString(),
+  };
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Saving...';
+  const { error } = await sb.from('about_section').upsert([payload]);
+  btn.disabled = false; btn.textContent = '💾 Save About Section';
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast('About section saved ✓');
+}
+
+/* ============ ENQUIRIES ============ */
+async function loadEnquiries(){
+  const { data, error } = await sb.from('enquiries').select('*').order('created_at', { ascending: false });
+  if (error) { toast('Load failed: ' + error.message, 'error'); return; }
+  const list = data || [];
+  document.getElementById('enquiriesCount').textContent = `(${list.length})`;
+  const el = document.getElementById('enquiriesList');
+  if (!list.length) { el.innerHTML = '<div class="empty">Koi enquiry nahi hai.</div>'; return; }
+  el.innerHTML = `<table><thead><tr>
+    <th>Date</th><th>Name</th><th>Phone</th><th>Email</th><th>Product</th><th>Message</th><th></th>
+  </tr></thead><tbody>` + list.map(e => `
+    <tr>
+      <td style="white-space:nowrap">${new Date(e.created_at).toLocaleString('en-IN')}</td>
+      <td><strong>${esc(e.name)}</strong></td>
+      <td><a href="tel:${esc(e.phone)}">${esc(e.phone)}</a></td>
+      <td>${esc(e.email||'-')}</td>
+      <td>${esc(e.product||'-')}</td>
+      <td style="max-width:260px">${esc(e.message||'-')}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteEnquiry(${e.id})">Delete</button></td>
+    </tr>
+  `).join('') + `</tbody></table>`;
+}
+async function deleteEnquiry(id){
+  if (!confirm('Delete this enquiry?')) return;
+  const { error } = await sb.from('enquiries').delete().eq('id', id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast('Deleted'); loadEnquiries();
+}
+
+/* ============ INIT ============ */
+checkSession();
+</script>
+</body>
+</html>
